@@ -1,12 +1,13 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import { Area, AreaChart, Bar, BarChart, Cell, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { ChevronRight, Dumbbell, Flame, Plus, Settings as Gear, TrendingDown, TrendingUp, UtensilsCrossed } from 'lucide-react'
+import { ChevronRight, Dumbbell, Flame, Plus, Moon, Settings as Gear, Sun, TrendingDown, TrendingUp, UtensilsCrossed } from 'lucide-react'
 import Ring from '../components/Ring'
 import Sheet from '../components/Sheet'
 import { Button, Card, Chip, EmptyState, IconButton, SectionTitle, Stat, Stepper } from '../components/ui'
 import { toast } from '../components/Toast'
 import type { Tab } from '../components/TabBar'
-import { logWeight, useAppState, useRecipes } from '../lib/store'
+import { logWeight, updateSettings, useAppState, useRecipes } from '../lib/store'
+import { isDark } from '../lib/theme'
 import { addDays, dayShort, greeting, longDate, monthDay, today, weekDates } from '../lib/date'
 import { cardioTotals, dayNutrition, loggedExercises, strengthHistory, weekStreak, workoutsInWeek } from '../lib/stats'
 import SettingsSheet from './Settings'
@@ -68,7 +69,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (t: Tab) => void
           <p className="text-[13px] font-semibold uppercase tracking-wide text-muted">{longDate(t)}</p>
           <h1 className="text-[34px] font-bold leading-tight tracking-tight">{greeting()}{name ? `, ${name}` : ''}</h1>
         </div>
-        <div className="pb-1.5">
+        <div className="flex gap-2 pb-1.5">
+          <IconButton label={isDark(settings.theme) ? 'Switch to light mode' : 'Switch to dark mode'} onClick={() => updateSettings({ theme: isDark(settings.theme) ? 'light' : 'dark' })}>
+            {isDark(settings.theme) ? <Sun size={20} /> : <Moon size={20} />}
+          </IconButton>
           <IconButton label="Settings" onClick={() => setSettingsOpen(true)}><Gear size={20} /></IconButton>
         </div>
       </header>

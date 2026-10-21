@@ -18,7 +18,7 @@ export interface AppState {
 const STORAGE_KEY = 'fuel-and-form-v1'
 
 const DEFAULT_STATE: AppState = {
-  settings: { name: '', weeklyGoal: 4, calorieTarget: 2000, proteinTarget: 140, weightUnit: 'lb', distanceUnit: 'mi' },
+  settings: { name: '', weeklyGoal: 4, calorieTarget: 2000, proteinTarget: 140, weightUnit: 'lb', distanceUnit: 'mi', theme: 'system' },
   customRecipes: [],
   plan: [],
   workouts: [],
@@ -42,6 +42,8 @@ function load(): AppState {
 
 let state = load()
 const listeners = new Set<() => void>()
+
+export const getSettings = () => state.settings
 
 function setState(next: AppState) {
   state = next

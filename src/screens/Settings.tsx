@@ -38,6 +38,15 @@ export default function SettingsSheet({ open, onClose }: { open: boolean; onClos
         </div>
 
         <div>
+          <p className="mb-1.5 px-1 text-[13px] font-semibold uppercase tracking-wide text-muted">Appearance</p>
+          <Segmented
+            options={[{ value: 'system', label: 'Auto' }, { value: 'light', label: '☀️ Light' }, { value: 'dark', label: '🌙 Dark' }]}
+            value={settings.theme}
+            onChange={(v) => updateSettings({ theme: v })}
+          />
+        </div>
+
+        <div>
           <p className="mb-1.5 px-1 text-[13px] font-semibold uppercase tracking-wide text-muted">Units</p>
           <div className="space-y-2">
             <Segmented options={[{ value: 'lb', label: 'Pounds (lb)' }, { value: 'kg', label: 'Kilograms (kg)' }]} value={settings.weightUnit} onChange={(v) => updateSettings({ weightUnit: v })} />

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import TabBar, { type Tab } from './components/TabBar'
 import { Toaster } from './components/Toast'
@@ -6,9 +6,13 @@ import Dashboard from './screens/Dashboard'
 import Meals from './screens/Meals'
 import Recipes from './screens/Recipes'
 import Workouts from './screens/Workouts'
+import { useAppState } from './lib/store'
+import { applyTheme } from './lib/theme'
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('dashboard')
+  const { theme } = useAppState().settings
+  useEffect(() => applyTheme(theme), [theme])
 
   const go = (t: Tab) => {
     setTab(t)

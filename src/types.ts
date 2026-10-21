@@ -52,5 +52,6 @@ export interface Settings {
   proteinTarget: number
   weightUnit: 'lb' | 'kg'
   distanceUnit: 'mi' | 'km'
+  theme: 'system' | 'light' | 'dark'
 }
 
