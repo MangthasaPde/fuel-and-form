@@ -4,7 +4,7 @@ import { Minus, Plus } from 'lucide-react'
 export function Card({ children, className = '', onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
   const Tag = onClick ? 'button' : 'div'
   return (
-    <Tag onClick={onClick} className={`block w-full rounded-3xl bg-card p-5 text-left shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] ${onClick ? 'press' : ''} ${className}`}>
+    <Tag onClick={onClick} className={`block w-full rounded-3xl bg-card p-5 text-left shadow-[0_1px_2px_rgba(70,45,10,0.05),0_10px_28px_rgba(70,45,10,0.06)] ${onClick ? 'press' : ''} ${className}`}>
       {children}
     </Tag>
   )

@@ -2,44 +2,45 @@
 
 @theme {
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", system-ui, sans-serif;
+  --font-display: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
   --color-bg: var(--bg);
   --color-card: var(--card);
   --color-card2: var(--card2);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-line: var(--line);
-  --color-meal: #10b981;
+  --color-meal: #4f8f4b;
   --color-meal-soft: var(--meal-soft);
-  --color-fit: #f97316;
+  --color-fit: #e8743b;
   --color-fit-soft: var(--fit-soft);
-  --color-sky: #3b82f6;
-  --color-grape: #8b5cf6;
+  --color-sky: #4a7fb5;
+  --color-grape: #9b5f8e;
 }
 
 :root {
-  --bg: #f2f2f7;
-  --card: #ffffff;
-  --card2: #f2f2f7;
-  --ink: #111114;
-  --muted: #8a8a93;
-  --line: rgba(60, 60, 67, 0.12);
-  --meal-soft: #d1fae5;
-  --fit-soft: #ffedd5;
-  --glass: rgba(255, 255, 255, 0.72);
+  --bg: #faf5ec;
+  --card: #fffdf8;
+  --card2: #f3ece0;
+  --ink: #2b2118;
+  --muted: #8f8272;
+  --line: rgba(80, 60, 30, 0.12);
+  --meal-soft: #e5f0dc;
+  --fit-soft: #fbe7d9;
+  --glass: rgba(250, 245, 236, 0.8);
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #000000;
-    --card: #1c1c1e;
-    --card2: #2c2c2e;
-    --ink: #f5f5f7;
-    --muted: #8e8e93;
-    --line: rgba(84, 84, 88, 0.45);
-    --meal-soft: rgba(16, 185, 129, 0.18);
-    --fit-soft: rgba(249, 115, 22, 0.18);
-    --glass: rgba(28, 28, 30, 0.72);
+    --bg: #14100c;
+    --card: #211b15;
+    --card2: #2d261e;
+    --ink: #f7f0e4;
+    --muted: #a09282;
+    --line: rgba(255, 235, 205, 0.12);
+    --meal-soft: rgba(111, 166, 91, 0.22);
+    --fit-soft: rgba(232, 116, 59, 0.2);
+    --glass: rgba(33, 27, 21, 0.8);
     color-scheme: dark;
   }
 }
@@ -57,6 +58,8 @@ body {
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
+
+h1, h2 { font-family: var(--font-display); }
 
 button { cursor: pointer; -webkit-user-select: none; user-select: none; }
 input, textarea, select { font-size: 16px; } /* prevents iOS zoom on focus */

@@ -10,13 +10,14 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: { globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg}'] },
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
         name: 'Fuel & Form',
         short_name: 'Fuel & Form',
         description: 'Easy meals, workouts and progress — all in one place.',
-        theme_color: '#0b0b0f',
-        background_color: '#f5f5f7',
+        theme_color: '#faf5ec',
+        background_color: '#faf5ec',
         display: 'standalone',
         orientation: 'portrait',
         start_url: './',

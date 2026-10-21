@@ -1,5 +1,7 @@
 import { Clock, Flame, Users } from 'lucide-react'
+import RecipePhoto from './RecipePhoto'
 import { cuisineById } from '../data/cuisines'
+import { PHOTO_CREDITS } from '../data/photos'
 import type { MealType, Recipe } from '../types'
 
 export const SLOTS: { value: MealType; label: string; emoji: string }[] = [
@@ -14,9 +16,7 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
   const cuisine = cuisineById(recipe.cuisine)
   return (
     <div>
-      <div className={`grid h-40 place-items-center rounded-3xl bg-gradient-to-br ${cuisine.tint}`}>
-        <span className="text-[84px] drop-shadow-sm">{recipe.emoji}</span>
-      </div>
+      <RecipePhoto recipe={recipe} eager className="h-60 w-full rounded-[28px] shadow-md" emojiSize="text-[84px]" />
 
       <p className="mt-4 text-[13px] font-semibold uppercase tracking-wide text-meal">
         {cuisine.emoji} {cuisine.name} · Easy
@@ -64,6 +64,14 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
           </li>
         ))}
       </ol>
+
+      {PHOTO_CREDITS[recipe.id] && (
+        <p className="mt-6 text-center text-[11px] leading-relaxed text-muted">
+          Photo: {PHOTO_CREDITS[recipe.id].author} ·{' '}
+          <a href={PHOTO_CREDITS[recipe.id].page} target="_blank" rel="noreferrer" className="underline">{PHOTO_CREDITS[recipe.id].license}</a>
+          {' '}via Wikimedia Commons
+        </p>
+      )}
     </div>
   )
 }

@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CalendarDays, Check, ChefHat, ChevronRight, Plus, Shuffle, ShoppingBasket, Sparkles, X } from 'lucide-react'
 import Sheet from '../components/Sheet'
+import RecipePhoto from '../components/RecipePhoto'
+import { photoFor } from '../data/photos'
 import RecipeView, { SLOTS } from '../components/RecipeView'
 import { Button, Card, EmptyState, ScreenHeader, SectionTitle, Segmented } from '../components/ui'
 import { toast } from '../components/Toast'
@@ -90,7 +92,7 @@ export default function Meals() {
         {/* Cuisine tiles */}
         <button
           onClick={() => suggest(null)}
-          className="press mt-3 flex w-full items-center gap-3 rounded-3xl bg-gradient-to-r from-meal to-emerald-400 p-4 text-left text-white shadow-lg shadow-meal/25"
+          className="press mt-3 flex w-full items-center gap-3 rounded-3xl bg-gradient-to-r from-meal to-[#86b46a] p-4 text-left text-white shadow-lg shadow-meal/25"
         >
           <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/20 text-2xl">🎲</span>
           <span className="flex-1">
@@ -105,10 +107,14 @@ export default function Meals() {
             <button
               key={c.id}
               onClick={() => suggest(c.id)}
-              className={`press flex min-w-0 items-center gap-2.5 rounded-3xl bg-card bg-gradient-to-br p-3.5 text-left shadow-sm ${c.tint}`}
+              className="press relative h-28 overflow-hidden rounded-3xl bg-card2 text-left shadow-sm"
             >
-              <span className="text-[32px] leading-none">{c.emoji}</span>
-              <span className={`min-w-0 truncate font-semibold tracking-tight ${c.name.length > 10 ? 'text-[13px]' : 'text-[16px]'}`}>{c.name}</span>
+              <img src={photoFor(c.cover)} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+              <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+              <span className="relative flex h-full min-w-0 items-end gap-2 p-3 text-white">
+                <span className="text-[22px] leading-none drop-shadow">{c.emoji}</span>
+                <span className="min-w-0 truncate text-[16px] font-semibold leading-none drop-shadow">{c.name}</span>
+              </span>
             </button>
           ))}
         </div>
@@ -126,7 +132,7 @@ export default function Meals() {
               if (!r) return null
               return (
                 <button key={p.id} onClick={() => setDetail(r)} className="press flex w-full items-center gap-3 px-4 py-3.5 text-left">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-card2 text-2xl">{r.emoji}</span>
+                  <RecipePhoto recipe={r} className="h-14 w-14 shrink-0 rounded-2xl" emojiSize="text-2xl" />
                   <span className="flex-1">
                     <span className="block text-[12px] font-semibold uppercase tracking-wide text-muted">{p.slot}</span>
                     <span className="block text-[16px] font-semibold">{r.name}</span>
@@ -154,7 +160,7 @@ export default function Meals() {
                 <span className={`text-[12px] font-semibold uppercase ${isToday ? 'text-white/85' : 'text-muted'}`}>{dayShort(d)}</span>
                 <span className="text-[22px] font-bold tabular-nums">{dayNum(d)}</span>
                 <span className="mt-1.5 flex min-h-7 flex-wrap justify-center gap-0.5 text-[20px] leading-7">
-                  {items.length ? items.slice(0, 3).map((p) => <span key={p.id}>{byId.get(p.recipeId)?.emoji}</span>) : <Plus size={18} className={`mt-1 ${isToday ? 'text-white/80' : 'text-muted'}`} />}
+                  {items.length ? items.slice(0, 3).map((p) => { const r = byId.get(p.recipeId); return r ? <RecipePhoto key={p.id} recipe={r} className="-ml-1.5 h-7 w-7 rounded-full ring-2 ring-card first:ml-0" emojiSize="text-[14px]" /> : null }) : <Plus size={18} className={`mt-1 ${isToday ? 'text-white/80' : 'text-muted'}`} />}
                 </span>
               </button>
             )
@@ -228,7 +234,7 @@ export default function Meals() {
               const r = entry && byId.get(entry.recipeId)
               return (
                 <div key={s.value} className="flex items-center gap-3 rounded-2xl bg-card p-3">
-                  <span className="grid h-12 w-12 place-items-center rounded-2xl bg-card2 text-2xl">{r ? r.emoji : s.emoji}</span>
+                  {r ? <RecipePhoto recipe={r} className="h-14 w-14 shrink-0 rounded-2xl" emojiSize="text-2xl" /> : <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-card2 text-2xl">{s.emoji}</span>}
                   <button className="flex-1 text-left" onClick={() => (r ? setDetail(r) : setPicker({ date: viewDay, slot: s.value }))}>
                     <span className="block text-[12px] font-semibold uppercase tracking-wide text-muted">{s.label}</span>
                     <span className={`block text-[16px] font-semibold ${r ? '' : 'text-meal'}`}>{r ? r.name : '+ Add a dish'}</span>

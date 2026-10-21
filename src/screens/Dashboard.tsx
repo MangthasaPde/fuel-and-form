@@ -11,7 +11,7 @@ import { addDays, dayShort, greeting, longDate, monthDay, today, weekDates } fro
 import { cardioTotals, dayNutrition, loggedExercises, strengthHistory, weekStreak, workoutsInWeek } from '../lib/stats'
 import SettingsSheet from './Settings'
 
-const C = { meal: '#10b981', fit: '#f97316', sky: '#3b82f6', grape: '#8b5cf6', muted: '#8a8a93' }
+const C = { meal: '#4f8f4b', fit: '#e8743b', sky: '#4a7fb5', grape: '#9b5f8e', muted: '#8f8272' }
 const axis = { tick: { fill: C.muted, fontSize: 11 }, axisLine: false, tickLine: false } as const
 
 function ChartTip({ active, payload, label, unit, fmt }: { active?: boolean; payload?: { value: number }[]; label?: string; unit: string; fmt?: (l: string) => string }) {

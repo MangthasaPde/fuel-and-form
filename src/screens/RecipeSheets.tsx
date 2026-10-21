@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { CalendarPlus, Pencil, Search, Trash2 } from 'lucide-react'
 import Sheet from '../components/Sheet'
+import RecipePhoto from '../components/RecipePhoto'
 import RecipeView, { SLOTS } from '../components/RecipeView'
 import DayPicker from '../components/DayPicker'
 import { Button, Chip, Field, Segmented, inputClass } from '../components/ui'
@@ -108,7 +109,7 @@ export function RecipePickerSheet({ target, onClose }: { target: { date: string;
               onClose()
             }}
           >
-            <span className="text-3xl">{r.emoji}</span>
+            <RecipePhoto recipe={r} className="h-14 w-14 shrink-0 rounded-2xl" emojiSize="text-3xl" />
             <span className="flex-1">
               <span className="block text-[16px] font-semibold">{r.name}</span>
               <span className="text-[13px] text-muted">{r.minutes} min · {r.calories} kcal · {r.protein}g protein</span>

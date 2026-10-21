@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { Chip, EmptyState, IconButton, ScreenHeader, inputClass } from '../components/ui'
-import { CUISINES, cuisineById } from '../data/cuisines'
+import RecipePhoto from '../components/RecipePhoto'
+import { CUISINES } from '../data/cuisines'
 import { useRecipes } from '../lib/store'
 import { RecipeDetailSheet, RecipeEditorSheet } from './RecipeSheets'
 import type { CuisineId, Recipe } from '../types'
@@ -77,9 +78,7 @@ export default function Recipes() {
       <div className="mt-4 grid grid-cols-2 gap-3 px-5">
         {list.map((r) => (
           <button key={r.id} onClick={() => setDetailId(r.id)} className="press overflow-hidden rounded-3xl bg-card text-left shadow-sm">
-            <div className={`grid h-28 place-items-center bg-gradient-to-br ${cuisineById(r.cuisine).tint}`}>
-              <span className="text-[52px]">{r.emoji}</span>
-            </div>
+            <RecipePhoto recipe={r} className="h-36 w-full" emojiSize="text-[52px]" />
             <div className="p-3">
               <p className="line-clamp-2 min-h-[40px] text-[15px] font-semibold leading-tight">{r.name}</p>
               <p className="mt-1 text-[13px] text-muted">{r.minutes} min · {r.calories} kcal</p>
