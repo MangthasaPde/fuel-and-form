@@ -9,10 +9,10 @@ crons = ["0 * * * *"]
 # Created with: npx wrangler kv namespace create SUBS   (paste the id it prints here)
 [[kv_namespaces]]
 binding = "SUBS"
-id = "REPLACE_WITH_KV_ID"
+id = "4775b41b8f264bbba5a64f33f16dd8d1"
 
 [vars]
 # Your published app's address, e.g. https://yourname.github.io  (no path, no trailing slash)
-ALLOWED_ORIGIN = "https://REPLACE-WITH-YOUR-USERNAME.github.io"
-VAPID_SUBJECT = "https://REPLACE-WITH-YOUR-USERNAME.github.io"
+ALLOWED_ORIGIN = "https://mangthasapde.github.io"
+VAPID_SUBJECT = "https://mangthasapde.github.io/fuel-and-form"
 VAPID_PUBLIC = "BBIh0yLxe_wBPYB9AOstodsIbpx9CokdlAxgzoVOBzX8FPzH-dU1SdMBKcQFv7liBZnQ375CfuelfMRB2zcMuYo"
