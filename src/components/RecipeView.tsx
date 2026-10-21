@@ -1,4 +1,4 @@
-import { Clock, Flame, Users } from 'lucide-react'
+import { Clock, ExternalLink, Flame, PlayCircle, Users } from 'lucide-react'
 import RecipePhoto from './RecipePhoto'
 import { cuisineById } from '../data/cuisines'
 import { PHOTO_CREDITS } from '../data/photos'
@@ -11,6 +11,13 @@ export const SLOTS: { value: MealType; label: string; emoji: string }[] = [
   { value: 'snack', label: 'Snack', emoji: '🍎' },
 ]
 
+/** "20 min · 520 kcal" — leaves out anything unknown (e.g. recipes saved from the web). */
+export function recipeMeta(r: Recipe, withProtein = false): string {
+  return [r.minutes ? `${r.minutes} min` : '', r.calories ? `${r.calories} kcal` : '', withProtein && r.protein ? `${r.protein}g protein` : '']
+    .filter(Boolean)
+    .join(' · ')
+}
+
 /** Full recipe: hero, quick facts, macros, ingredients and steps. */
 export default function RecipeView({ recipe }: { recipe: Recipe }) {
   const cuisine = cuisineById(recipe.cuisine)
@@ -19,17 +26,22 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
       <RecipePhoto recipe={recipe} eager className="h-60 w-full rounded-[28px] shadow-md" emojiSize="text-[84px]" />
 
       <p className="mt-4 text-[13px] font-semibold uppercase tracking-wide text-meal">
-        {cuisine.emoji} {cuisine.name} · Easy
+        {cuisine.emoji} {cuisine.name}{recipe.webId ? ' · From the web' : ' · Easy'}
       </p>
       <h2 className="mt-1 text-[26px] font-bold leading-tight tracking-tight">{recipe.name}</h2>
 
       <div className="mt-3 flex flex-wrap gap-2 text-[14px] font-medium">
-        <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5"><Clock size={15} className="text-muted" />{recipe.minutes} min</span>
-        <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5"><Users size={15} className="text-muted" />Serves {recipe.servings}</span>
-        <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5"><Flame size={15} className="text-fit" />{recipe.calories} kcal</span>
+        {recipe.minutes > 0 && <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5"><Clock size={15} className="text-muted" />{recipe.minutes} min</span>}
+        {recipe.servings > 0 && <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5"><Users size={15} className="text-muted" />Serves {recipe.servings}</span>}
+        {recipe.calories > 0 && <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5"><Flame size={15} className="text-fit" />{recipe.calories} kcal</span>}
+        {recipe.video && (
+          <a href={recipe.video} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-fit">
+            <PlayCircle size={15} />Watch video
+          </a>
+        )}
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      {recipe.protein + recipe.carbs + recipe.fat > 0 && <div className="mt-4 grid grid-cols-3 gap-2">
         {[
           { label: 'Protein', value: recipe.protein, color: 'bg-sky' },
           { label: 'Carbs', value: recipe.carbs, color: 'bg-meal' },
@@ -43,7 +55,7 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
             <div className="mt-0.5 text-[20px] font-bold tabular-nums">{m.value}<span className="text-[13px] text-muted">g</span></div>
           </div>
         ))}
-      </div>
+      </div>}
 
       <h3 className="mt-6 mb-2 text-[18px] font-bold">Ingredients</h3>
       <ul className="divide-y divide-line rounded-2xl bg-card px-4">
@@ -65,7 +77,18 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
         ))}
       </ol>
 
-      {PHOTO_CREDITS[recipe.id] && (
+      {recipe.webId && (
+        <p className="mt-6 text-center text-[11px] leading-relaxed text-muted">
+          Recipe and photo from <a href="https://www.themealdb.com" target="_blank" rel="noreferrer" className="underline">TheMealDB</a>
+          {recipe.source && (
+            <>
+              {' · '}
+              <a href={recipe.source} target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 underline">original recipe <ExternalLink size={10} /></a>
+            </>
+          )}
+        </p>
+      )}
+      {!recipe.webId && PHOTO_CREDITS[recipe.id] && (
         <p className="mt-6 text-center text-[11px] leading-relaxed text-muted">
           Photo: {PHOTO_CREDITS[recipe.id].author} ·{' '}
           <a href={PHOTO_CREDITS[recipe.id].page} target="_blank" rel="noreferrer" className="underline">{PHOTO_CREDITS[recipe.id].license}</a>

@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
-import { CalendarPlus, Pencil, Search, Trash2 } from 'lucide-react'
+import { BookmarkPlus, CalendarPlus, Check, Pencil, Search, Trash2 } from 'lucide-react'
 import Sheet from '../components/Sheet'
 import RecipePhoto from '../components/RecipePhoto'
-import RecipeView, { SLOTS } from '../components/RecipeView'
+import RecipeView, { SLOTS, recipeMeta } from '../components/RecipeView'
 import DayPicker from '../components/DayPicker'
 import { Button, Chip, Field, Segmented, inputClass } from '../components/ui'
 import { toast } from '../components/Toast'
 import { CUISINES } from '../data/cuisines'
-import { addToPlan, deleteRecipe, saveRecipe, useRecipes } from '../lib/store'
+import { addToPlan, deleteRecipe, saveRecipe, useAppState, useRecipes } from '../lib/store'
+import { webToRecipe, type WebRecipe } from '../lib/online'
 import { addDays, mealTypeForNow, monthDay, today, weekDates } from '../lib/date'
 import type { CuisineId, MealType, Recipe } from '../types'
 
@@ -90,6 +91,60 @@ export function RecipeDetailSheet({ recipe, onClose, onEdit }: { recipe: Recipe 
   )
 }
 
+/** A recipe found online: read it, save it to your recipes, or put it straight into your week. */
+export function WebRecipeSheet({ web, onClose }: { web: WebRecipe | null; onClose: () => void }) {
+  const { customRecipes } = useAppState()
+  const saved = web ? customRecipes.find((r) => r.webId === web.webId) : undefined
+  const [planning, setPlanning] = useState(false)
+  const close = () => {
+    setPlanning(false)
+    onClose()
+  }
+  const save = () => {
+    if (web && !saved) saveRecipe(webToRecipe(web))
+  }
+  return (
+    <Sheet
+      open={!!web}
+      onClose={close}
+      tall
+      title="🌍 From the web"
+      footer={
+        web &&
+        (planning && saved ? (
+          <AddToPlan recipe={saved} onDone={close} />
+        ) : (
+          <div className="flex gap-2">
+            <Button
+              variant="soft"
+              className="flex-1 whitespace-nowrap px-3"
+              disabled={!!saved}
+              onClick={() => {
+                save()
+                toast('Saved to your recipes')
+              }}
+            >
+              {saved ? <><Check size={18} /> Saved</> : <><BookmarkPlus size={18} /> Save</>}
+            </Button>
+            <Button
+              variant="meal"
+              className="flex-[1.5] whitespace-nowrap px-3"
+              onClick={() => {
+                save()
+                setPlanning(true)
+              }}
+            >
+              <CalendarPlus size={18} /> Add to my week
+            </Button>
+          </div>
+        ))
+      }
+    >
+      {web && <RecipeView recipe={{ ...webToRecipe(web), id: -1 }} />}
+    </Sheet>
+  )
+}
+
 /** Searchable list for choosing a recipe for a specific day + slot. */
 export function RecipePickerSheet({ target, onClose }: { target: { date: string; slot: MealType } | null; onClose: () => void }) {
   const recipes = useRecipes()
@@ -122,7 +177,7 @@ export function RecipePickerSheet({ target, onClose }: { target: { date: string;
             <RecipePhoto recipe={r} className="h-14 w-14 shrink-0 rounded-2xl" emojiSize="text-3xl" />
             <span className="flex-1">
               <span className="block text-[16px] font-semibold">{r.name}</span>
-              <span className="text-[13px] text-muted">{r.minutes} min · {r.calories} kcal · {r.protein}g protein</span>
+              <span className="text-[13px] text-muted">{recipeMeta(r, true)}</span>
             </span>
           </button>
         ))}

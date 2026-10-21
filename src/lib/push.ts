@@ -2,8 +2,8 @@ import type { MealPlanEntry, Recipe } from '../types'
 import { addDays, today, weekDates } from './date'
 import { groceryFor } from './grocery'
 
-// Where the reminder service lives and its public key. Both are set when the app is published (see workers/push/README.md).
-const API = import.meta.env.VITE_PUSH_API as string | undefined
+// Where the app's online service lives and its public key, from /.env (see workers/push/README.md).
+const API = import.meta.env.VITE_API_URL as string | undefined
 const VAPID = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined
 
 export type PushState = 'unconfigured' | 'unsupported' | 'blocked' | 'off' | 'on'

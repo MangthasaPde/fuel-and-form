@@ -12,7 +12,7 @@ list. Nothing else leaves your phone.
 You need: the app published over HTTPS (e.g. GitHub Pages) and a free Cloudflare account.
 
 1. **Keys** (already done on this Mac): `node scripts/generate-vapid.mjs`
-   Public key is in `wrangler.toml` and `/.env.production`. Private key is in `.vapid-private.json` (git-ignored).
+   Public key is in `wrangler.toml` and `/.env`. Private key is in `.vapid-private.json` (git-ignored).
 2. **Log in to Cloudflare** (opens your browser): `npx wrangler login`
 3. **Create storage**: `npx wrangler kv namespace create SUBS`, then paste the printed `id` into `wrangler.toml`.
 4. **Fill in `wrangler.toml`**: set `ALLOWED_ORIGIN` and `VAPID_SUBJECT` to your app's address,
@@ -20,7 +20,7 @@ You need: the app published over HTTPS (e.g. GitHub Pages) and a free Cloudflare
 5. **Upload the private key as a secret**: `npx wrangler secret put VAPID_PRIVATE_JWK < .vapid-private.json`
 6. **Publish the service**: `npx wrangler deploy` — it prints an address like
    `https://fuel-and-form-push.<you>.workers.dev`.
-7. **Tell the app where it is**: add `VITE_PUSH_API=https://fuel-and-form-push.<you>.workers.dev` to `/.env.production`,
+7. **Tell the app where it is**: add `VITE_API_URL=https://fuel-and-form-push.<you>.workers.dev` to `/.env`,
    then rebuild and republish the app.
 
 ## On your iPhone (iOS 16.4+)

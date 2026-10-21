@@ -10,7 +10,18 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      workbox: { globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg}'], importScripts: ['push-handler.js'] },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg}'],
+        importScripts: ['push-handler.js'],
+        // photos of recipes found online are kept after the first view, so saved ones work offline
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/www\.themealdb\.com\/images\//,
+            handler: 'CacheFirst',
+            options: { cacheName: 'web-recipe-photos', expiration: { maxEntries: 300 }, cacheableResponse: { statuses: [0, 200] } },
+          },
+        ],
+      },
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
         name: 'Fuel & Form',

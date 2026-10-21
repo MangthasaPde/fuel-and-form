@@ -1,4 +1,4 @@
-import { cleanItems, isPushEndpoint, isSendTime, localParts, vapidHeaders, type Stored } from './core.ts'
+import { cleanItems, isPushEndpoint, isSendTime, localParts, normalizeMeal, vapidHeaders, type Stored } from './core.ts'
 
 export interface Env {
   SUBS: KVNamespace
@@ -6,6 +6,7 @@ export interface Env {
   VAPID_PUBLIC: string
   VAPID_SUBJECT: string
   VAPID_PRIVATE_JWK: string // secret
+  MEALDB_KEY?: string // optional secret; TheMealDB's free test key '1' is used if not set
 }
 
 const ID = /^[a-f0-9]{64}$/
@@ -20,8 +21,11 @@ async function sendPush(env: Env, stored: Stored): Promise<number> {
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
+    // the published app, plus the app running on your Mac while developing
+    const origin = req.headers.get('Origin') ?? ''
+    const allowed = origin === env.ALLOWED_ORIGIN || /^http:\/\/localhost:\d+$/.test(origin) ? origin : env.ALLOWED_ORIGIN
     const cors = {
-      'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN,
+      'Access-Control-Allow-Origin': allowed,
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       Vary: 'Origin',
@@ -31,6 +35,17 @@ export default {
 
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors })
     const url = new URL(req.url)
+
+    if (req.method === 'GET' && url.pathname === '/api/recipes') {
+      const q = (url.searchParams.get('q') ?? '').trim()
+      if (q.length < 2 || q.length > 60) return json({ error: 'search for 2–60 characters' }, 400)
+      const res = await fetch(`https://www.themealdb.com/api/json/v1/${env.MEALDB_KEY || '1'}/search.php?s=${encodeURIComponent(q)}`, {
+        cf: { cacheTtl: 86400, cacheEverything: true }, // the same search is answered from Cloudflare's cache for a day
+      })
+      if (!res.ok) return json({ error: 'recipe service unavailable' }, 502)
+      const data = (await res.json()) as { meals: Record<string, string | null>[] | null }
+      return json({ results: (data.meals ?? []).slice(0, 24).map(normalizeMeal) })
+    }
 
     if (req.method === 'GET' && url.pathname === '/api/list') {
       const id = url.searchParams.get('id') ?? ''

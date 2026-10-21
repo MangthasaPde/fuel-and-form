@@ -8,7 +8,7 @@ export default function RecipePhoto({
   recipe, className = '', emojiSize = 'text-5xl', eager,
 }: { recipe: Recipe; className?: string; emojiSize?: string; eager?: boolean }) {
   const [failed, setFailed] = useState(false)
-  const src = photoFor(recipe.id)
+  const src = recipe.image ?? photoFor(recipe.id)
   if (!src || failed) {
     return (
       <div className={`grid place-items-center bg-gradient-to-br ${cuisineById(recipe.cuisine).tint} ${className}`}>

@@ -1,5 +1,5 @@
 // Creates the key pair that lets the reminder service prove to Apple that it may notify your phone.
-//   public key  -> goes into the app (.env.production) and the Worker config (wrangler.toml); not secret
+//   public key  -> goes into the app (.env) and the Worker config (wrangler.toml); not secret
 //   private key -> stays in workers/push/.vapid-private.json (git-ignored); you upload it to Cloudflare as a secret
 import { webcrypto as crypto } from 'node:crypto'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
@@ -20,7 +20,7 @@ writeFileSync('workers/push/.dev.vars', `VAPID_PRIVATE_JWK='${JSON.stringify(jwk
 const toml = readFileSync('workers/push/wrangler.toml', 'utf8').replace(/VAPID_PUBLIC = ".*"/, `VAPID_PUBLIC = "${publicKey}"`)
 writeFileSync('workers/push/wrangler.toml', toml)
 
-const envPath = '.env.production'
+const envPath = '.env'
 const rest = existsSync(envPath) ? readFileSync(envPath, 'utf8').split('\n').filter((l) => l && !l.startsWith('VITE_VAPID_PUBLIC_KEY=')) : []
 writeFileSync(envPath, [...rest, `VITE_VAPID_PUBLIC_KEY=${publicKey}`].join('\n') + '\n')
 

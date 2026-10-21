@@ -145,7 +145,7 @@ export default function Meals({ openGroceryKey = 0 }: { openGroceryKey?: number 
                     <span className="block text-[12px] font-semibold uppercase tracking-wide text-muted">{p.slot}</span>
                     <span className="block text-[16px] font-semibold">{r.name}</span>
                   </span>
-                  <span className="text-[14px] text-muted">{r.calories} kcal</span>
+                  <span className="text-[14px] text-muted">{r.calories > 0 && `${r.calories} kcal`}</span>
                   <ChevronRight size={18} className="text-muted" />
                 </button>
               )

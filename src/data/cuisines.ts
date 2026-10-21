@@ -14,4 +14,7 @@ export const CUISINES: { id: CuisineId; name: string; emoji: string; tint: strin
   { id: 'filipino', name: 'Filipino', emoji: '🍲', tint: 'from-yellow-400/25 to-sky-300/20', cover: 39 },
 ]
 
-export const cuisineById = (id: CuisineId) => CUISINES.find((c) => c.id === id)!
+// Recipes saved from the web that don't fit the cuisines above. Not shown as a tile.
+const WORLD = { id: 'world' as CuisineId, name: 'World', emoji: '🌍', tint: 'from-teal-400/25 to-indigo-300/20', cover: 0 }
+
+export const cuisineById = (id: CuisineId) => CUISINES.find((c) => c.id === id) ?? WORLD

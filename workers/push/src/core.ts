@@ -58,3 +58,72 @@ export function isPushEndpoint(endpoint: unknown): endpoint is string {
 
 export const cleanItems = (items: unknown): string[] =>
   Array.isArray(items) ? items.filter((i): i is string => typeof i === 'string').slice(0, 150).map((i) => i.slice(0, 120)) : []
+
+// ---------- Online recipe search (TheMealDB) ----------
+
+export interface WebRecipe {
+  webId: string
+  name: string
+  image: string
+  area: string
+  category: string
+  cuisine: string // one of the app's cuisine ids, or 'world'
+  ingredients: string[]
+  steps: string[]
+  source?: string
+  video?: string
+}
+
+// TheMealDB's "area" names -> the app's cuisines (nearest match; anything else becomes 'world').
+const AREA_GROUPS: Record<string, string[]> = {
+  italian: ['Italian', 'Italy', 'Sammarinese'],
+  mexican: ['Mexican', 'Mexico'],
+  chinese: ['Chinese', 'China', 'Taiwanese', 'Hong Konger'],
+  japanese: ['Japanese', 'Japan'],
+  thai: ['Thai', 'Thailand', 'Vietnamese', 'Malaysian', 'Indonesian', 'Singaporean', 'Cambodian', 'Laotian', 'Burmese'],
+  indian: ['Indian', 'India', 'Pakistani', 'Bangladeshi', 'Sri Lankan', 'Nepalese'],
+  korean: ['Korean', 'Korea', 'South Korean', 'North Korean'],
+  filipino: ['Filipino', 'Philippines'],
+  american: ['American', 'USA', 'Canadian'],
+  mediterranean: ['Greek', 'Turkish', 'Moroccan', 'Tunisian', 'Egyptian', 'Croatian', 'Spanish', 'Portuguese', 'Lebanese',
+    'Israeli', 'Cypriot', 'Maltese', 'Syrian', 'Palestinian', 'Jordanian', 'Algerian', 'Libyan', 'Albanian', 'Montenegrin'],
+}
+const AREA_TO_CUISINE: Record<string, string> = Object.fromEntries(
+  Object.entries(AREA_GROUPS).flatMap(([cuisine, areas]) => areas.map((a) => [a, cuisine])),
+)
+
+/** Turns one block of instructions into short, clean steps. */
+export function splitSteps(text: string): string[] {
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.replace(/^\s*(step\s*\d+[:.)-]?|\d+[.)]|[•\-*])\s*/i, '').trim())
+    .filter((l) => l.length > 2 && !/^step\s*\d+$/i.test(l))
+  if (lines.length > 1) return lines
+  // one long paragraph: split into sentences, two per step
+  const sentences = (lines[0] ?? '').match(/[^.!?]+[.!?]+(\s|$)/g)?.map((s) => s.trim()) ?? lines
+  const steps: string[] = []
+  for (let i = 0; i < sentences.length; i += 2) steps.push(sentences.slice(i, i + 2).join(' '))
+  return steps
+}
+
+export function normalizeMeal(m: Record<string, string | null>): WebRecipe {
+  const ingredients: string[] = []
+  for (let i = 1; i <= 20; i++) {
+    const ing = (m[`strIngredient${i}`] ?? '').trim()
+    const measure = (m[`strMeasure${i}`] ?? '').trim()
+    if (ing) ingredients.push(measure ? `${measure} ${ing}` : ing)
+  }
+  const area = m.strArea ?? ''
+  return {
+    webId: `mealdb-${m.idMeal}`,
+    name: (m.strMeal ?? '').trim(),
+    image: m.strMealThumb ?? '',
+    area,
+    category: m.strCategory ?? '',
+    cuisine: AREA_TO_CUISINE[area] ?? 'world',
+    ingredients,
+    steps: splitSteps(m.strInstructions ?? ''),
+    source: m.strSource || undefined,
+    video: m.strYoutube || undefined,
+  }
+}

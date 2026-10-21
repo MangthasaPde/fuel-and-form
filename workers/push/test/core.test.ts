@@ -65,3 +65,28 @@ test('cleanItems limits and sanitises the list', () => {
   assert.equal(cleanItems(Array.from({ length: 400 }, () => 'a')).length, 150)
   assert.deepEqual(cleanItems('nope'), [])
 })
+
+import { normalizeMeal, splitSteps } from '../src/core.ts'
+
+test('splitSteps handles numbered lines, STEP headings and single paragraphs', () => {
+  assert.deepEqual(splitSteps('1.\tSlice the eggplant.\r\n2.\tFry it.\r\n'), ['Slice the eggplant.', 'Fry it.'])
+  assert.deepEqual(splitSteps('STEP 1\r\nBoil water.\r\nSTEP 2\r\nAdd pasta.'), ['Boil water.', 'Add pasta.'])
+  assert.deepEqual(splitSteps('Heat oil. Add onion. Cook 5 min. Serve.'), ['Heat oil. Add onion.', 'Cook 5 min. Serve.'])
+})
+
+test('normalizeMeal builds ingredients with measures and maps the cuisine', () => {
+  const r = normalizeMeal({
+    idMeal: '53073', strMeal: 'Eggplant Adobo', strArea: 'Filipino', strCategory: 'Vegetarian',
+    strMealThumb: 'https://www.themealdb.com/images/x.jpg', strInstructions: 'Cook it. Eat it.',
+    strIngredient1: 'Egg Plants', strMeasure1: '1 lb ', strIngredient2: 'Salt', strMeasure2: ' ', strIngredient3: '', strMeasure3: '',
+    strYoutube: '', strSource: 'https://example.com/adobo',
+  })
+  assert.equal(r.webId, 'mealdb-53073')
+  assert.equal(r.cuisine, 'filipino')
+  assert.deepEqual(r.ingredients, ['1 lb Egg Plants', 'Salt'])
+  assert.equal(r.video, undefined)
+  assert.equal(r.source, 'https://example.com/adobo')
+  assert.equal(normalizeMeal({ idMeal: '1', strArea: 'French' }).cuisine, 'world')
+  assert.equal(normalizeMeal({ idMeal: '2', strArea: 'India' }).cuisine, 'indian')
+  assert.equal(normalizeMeal({ idMeal: '3', strArea: 'South Korean' }).cuisine, 'korean')
+})

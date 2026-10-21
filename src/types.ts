@@ -1,7 +1,7 @@
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
 export type CuisineId =
   | 'italian' | 'mexican' | 'chinese' | 'japanese' | 'thai'
-  | 'indian' | 'korean' | 'mediterranean' | 'american' | 'filipino'
+  | 'indian' | 'korean' | 'mediterranean' | 'american' | 'filipino' | 'world'
 
 export interface Recipe {
   id: number
@@ -19,6 +19,11 @@ export interface Recipe {
   steps: string[]
   tags: string[]
   custom?: boolean
+  // recipes saved from the web
+  image?: string
+  source?: string
+  video?: string
+  webId?: string
 }
 
 export interface MealPlanEntry {
