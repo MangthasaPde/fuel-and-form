@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      workbox: { globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg}'] },
+      workbox: { globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg}'], importScripts: ['push-handler.js'] },
       includeAssets: ['icons/apple-touch-icon.png'],
       manifest: {
         name: 'Fuel & Form',

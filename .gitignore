@@ -2,3 +2,7 @@ node_modules
 dist
 .DS_Store
 *.tsbuildinfo
+.vapid-private.json
+.dev.vars
+.wrangler
+.env.local

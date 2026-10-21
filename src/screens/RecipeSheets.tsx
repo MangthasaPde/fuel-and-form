@@ -8,16 +8,26 @@ import { Button, Chip, Field, Segmented, inputClass } from '../components/ui'
 import { toast } from '../components/Toast'
 import { CUISINES } from '../data/cuisines'
 import { addToPlan, deleteRecipe, saveRecipe, useRecipes } from '../lib/store'
-import { mealTypeForNow, monthDay, today, weekDates } from '../lib/date'
+import { addDays, mealTypeForNow, monthDay, today, weekDates } from '../lib/date'
 import type { CuisineId, MealType, Recipe } from '../types'
 
 /** Pick a day + meal slot and add a recipe to the plan. */
 export function AddToPlan({ recipe, onDone, initialSlot }: { recipe: Recipe; onDone: () => void; initialSlot?: MealType }) {
   const [day, setDay] = useState(today())
+  const [wk, setWk] = useState<'0' | '1'>('0')
+  const days = weekDates(addDays(today(), wk === '1' ? 7 : 0))
   const [slot, setSlot] = useState<MealType>(initialSlot ?? (recipe.mealTypes.includes(mealTypeForNow()) ? mealTypeForNow() : recipe.mealTypes[0]))
   return (
     <div className="space-y-3">
-      <DayPicker days={weekDates(today())} value={day} onChange={setDay} />
+      <Segmented
+        options={[{ value: '0', label: 'This week' }, { value: '1', label: 'Next week' }]}
+        value={wk}
+        onChange={(v) => {
+          setWk(v)
+          setDay(v === '1' ? weekDates(addDays(today(), 7))[0] : today())
+        }}
+      />
+      <DayPicker days={days} value={day} onChange={setDay} />
       <Segmented options={SLOTS.map((s) => ({ value: s.value, label: s.label }))} value={slot} onChange={setSlot} />
       <Button
         variant="meal"

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CalendarDays, Check, ChefHat, ChevronRight, Plus, Shuffle, ShoppingBasket, Sparkles, X } from 'lucide-react'
 import Sheet from '../components/Sheet'
@@ -9,17 +9,17 @@ import { Button, Card, EmptyState, ScreenHeader, SectionTitle, Segmented } from 
 import { toast } from '../components/Toast'
 import { CUISINES, cuisineById } from '../data/cuisines'
 import { addToPlan, rememberSuggestion, removeFromPlan, toggleGrocery, useAppState, useRecipes } from '../lib/store'
-import { addDays, dayNum, dayShort, longDate, mealTypeForNow, startOfWeek, today, weekDates } from '../lib/date'
+import { addDays, dayNum, dayShort, longDate, mealTypeForNow, today, weekDates } from '../lib/date'
+import { groceryFor } from '../lib/grocery'
 import { suggestRecipe } from '../lib/suggest'
 import { AddToPlan, RecipeDetailSheet, RecipePickerSheet } from './RecipeSheets'
 import type { CuisineId, MealType, Recipe } from '../types'
 
-export default function Meals() {
+export default function Meals({ openGroceryKey = 0 }: { openGroceryKey?: number }) {
   const { plan, recent, grocery } = useAppState()
   const recipes = useRecipes()
   const byId = useMemo(() => new Map(recipes.map((r) => [r.id, r])), [recipes])
   const t = today()
-  const week = weekDates(t)
 
   const [meal, setMeal] = useState<MealType>(mealTypeForNow())
   const [cuisine, setCuisine] = useState<CuisineId | null>(null)
@@ -29,6 +29,20 @@ export default function Meals() {
   const [picker, setPicker] = useState<{ date: string; slot: MealType } | null>(null)
   const [detail, setDetail] = useState<Recipe | null>(null)
   const [groceryOpen, setGroceryOpen] = useState(false)
+  const [wk, setWk] = useState<'0' | '1'>('0') // which week the strip and grocery list show: this (0) or next (1)
+  const week = useMemo(() => weekDates(addDays(t, wk === '1' ? 7 : 0)), [t, wk])
+
+  // opened from the Saturday notification
+  useEffect(() => {
+    if (openGroceryKey) {
+      setWk('1')
+      setGroceryOpen(true)
+    }
+  }, [openGroceryKey])
+
+  const weekToggle = (
+    <Segmented options={[{ value: '0', label: 'This week' }, { value: '1', label: 'Next week' }]} value={wk} onChange={setWk} />
+  )
 
   // Skip dishes eaten yesterday/today and ones suggested recently.
   const avoidBase = useMemo(
@@ -56,17 +70,11 @@ export default function Meals() {
   const plannedOn = (d: string) => plan.filter((p) => p.date === d).sort((a, b) => SLOTS.findIndex((s) => s.value === a.slot) - SLOTS.findIndex((s) => s.value === b.slot))
   const todayMeals = plannedOn(t)
 
-  // Grocery list: every ingredient from this week's plan (today onward), de-duplicated.
-  const weekStart = startOfWeek(t)
-  const groceryItems = useMemo(() => {
-    const items = new Map<string, string[]>()
-    plan.filter((p) => week.includes(p.date) && p.date >= t).forEach((p) => {
-      const r = byId.get(p.recipeId)
-      r?.ingredients.forEach((ing) => items.set(ing, [...new Set([...(items.get(ing) ?? []), r.name])]))
-    })
-    return [...items.entries()]
-  }, [plan, byId, week, t])
+  // Grocery list for the week being shown (this week counts from today onward).
+  const weekStart = week[0]
+  const groceryItems = useMemo(() => groceryFor(plan, byId, week, t), [plan, byId, week, t])
   const checked = grocery[weekStart] ?? []
+  const weekWord = wk === '1' ? 'next week' : 'this week'
 
   return (
     <div>
@@ -146,7 +154,7 @@ export default function Meals() {
         )}
 
         {/* Week strip */}
-        <SectionTitle>This week</SectionTitle>
+        <SectionTitle action={<div className="w-48">{weekToggle}</div>}>My week</SectionTitle>
         <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
           {week.map((d) => {
             const items = plannedOn(d)
@@ -170,9 +178,9 @@ export default function Meals() {
         <Card onClick={() => setGroceryOpen(true)} className="mt-3 flex items-center gap-3">
           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-meal-soft text-meal"><ShoppingBasket size={22} /></span>
           <span className="flex-1">
-            <span className="block text-[16px] font-semibold">Grocery list</span>
+            <span className="block text-[16px] font-semibold">Grocery list · {weekWord}</span>
             <span className="text-[14px] text-muted">
-              {groceryItems.length ? `${groceryItems.length - checked.filter((c) => groceryItems.some(([i]) => i === c)).length} items left this week` : 'Plan meals to build your list'}
+              {groceryItems.length ? `${groceryItems.length - checked.filter((c) => groceryItems.some(([i]) => i === c)).length} items left to buy` : 'Plan meals to build your list'}
             </span>
           </span>
           <ChevronRight size={18} className="text-muted" />
@@ -253,8 +261,9 @@ export default function Meals() {
 
       {/* Grocery list */}
       <Sheet open={groceryOpen} onClose={() => setGroceryOpen(false)} tall title="🧺 Grocery list">
+        <div className="mb-3">{weekToggle}</div>
         {groceryItems.length === 0 ? (
-          <EmptyState emoji="🛒" title="Your list is empty" text="Dishes you add for today and the rest of this week will show their ingredients here." />
+          <EmptyState emoji="🛒" title="Your list is empty" text={`Dishes you plan for ${weekWord} will show their ingredients here.`} />
         ) : (
           <div className="divide-y divide-line rounded-2xl bg-card">
             {groceryItems.map(([item, from]) => {
