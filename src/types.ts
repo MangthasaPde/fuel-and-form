@@ -1,7 +1,8 @@
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
 export type CuisineId =
   | 'italian' | 'mexican' | 'chinese' | 'japanese' | 'thai'
-  | 'indian' | 'korean' | 'mediterranean' | 'american' | 'filipino' | 'world'
+  | 'indian' | 'korean' | 'mediterranean' | 'american' | 'filipino'
+  | 'vietnamese' | 'indonesian' | 'malaysian' | 'world'
 
 export interface Recipe {
   id: number
@@ -24,6 +25,7 @@ export interface Recipe {
   source?: string
   video?: string
   webId?: string
+  estimated?: boolean // nutrition/servings estimated from a web recipe's ingredients
 }
 
 export interface MealPlanEntry {

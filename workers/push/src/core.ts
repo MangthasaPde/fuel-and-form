@@ -1,4 +1,5 @@
 // Pure logic, kept separate from the Worker so it can be tested on its own.
+import { estimateNutrition, guessServings } from './nutrition.ts'
 
 export interface Stored {
   subscription: { endpoint: string }
@@ -72,6 +73,12 @@ export interface WebRecipe {
   steps: string[]
   source?: string
   video?: string
+  // per serving, estimated from the ingredients (0 when too few ingredients were recognised)
+  servings: number
+  calories: number
+  protein: number
+  carbs: number
+  fat: number
 }
 
 // TheMealDB's "area" names -> the app's cuisines (nearest match; anything else becomes 'world').
@@ -80,7 +87,10 @@ const AREA_GROUPS: Record<string, string[]> = {
   mexican: ['Mexican', 'Mexico'],
   chinese: ['Chinese', 'China', 'Taiwanese', 'Hong Konger'],
   japanese: ['Japanese', 'Japan'],
-  thai: ['Thai', 'Thailand', 'Vietnamese', 'Malaysian', 'Indonesian', 'Singaporean', 'Cambodian', 'Laotian', 'Burmese'],
+  thai: ['Thai', 'Thailand', 'Cambodian', 'Laotian', 'Burmese'],
+  vietnamese: ['Vietnamese', 'Vietnam'],
+  indonesian: ['Indonesian', 'Indonesia'],
+  malaysian: ['Malaysian', 'Malaysia', 'Singaporean', 'Singapore', 'Bruneian'],
   indian: ['Indian', 'India', 'Pakistani', 'Bangladeshi', 'Sri Lankan', 'Nepalese'],
   korean: ['Korean', 'Korea', 'South Korean', 'North Korean'],
   filipino: ['Filipino', 'Philippines'],
@@ -114,6 +124,9 @@ export function normalizeMeal(m: Record<string, string | null>): WebRecipe {
     if (ing) ingredients.push(measure ? `${measure} ${ing}` : ing)
   }
   const area = m.strArea ?? ''
+  const servings = guessServings(ingredients)
+  const n = estimateNutrition(ingredients, servings)
+  const ok = n.coverage >= 0.6 && n.calories > 0
   return {
     webId: `mealdb-${m.idMeal}`,
     name: (m.strMeal ?? '').trim(),
@@ -125,5 +138,10 @@ export function normalizeMeal(m: Record<string, string | null>): WebRecipe {
     steps: splitSteps(m.strInstructions ?? ''),
     source: m.strSource || undefined,
     video: m.strYoutube || undefined,
+    servings,
+    calories: ok ? n.calories : 0,
+    protein: ok ? n.protein : 0,
+    carbs: ok ? n.carbs : 0,
+    fat: ok ? n.fat : 0,
   }
 }

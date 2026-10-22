@@ -13,6 +13,7 @@ import { addDays, dayNum, dayShort, longDate, mealTypeForNow, today, weekDates }
 import { groceryFor } from '../lib/grocery'
 import { suggestRecipe } from '../lib/suggest'
 import { AddToPlan, RecipeDetailSheet, RecipePickerSheet } from './RecipeSheets'
+import PantrySheet from './Pantry'
 import type { CuisineId, MealType, Recipe } from '../types'
 
 export default function Meals({ openGroceryKey = 0 }: { openGroceryKey?: number }) {
@@ -29,6 +30,7 @@ export default function Meals({ openGroceryKey = 0 }: { openGroceryKey?: number 
   const [picker, setPicker] = useState<{ date: string; slot: MealType } | null>(null)
   const [detail, setDetail] = useState<Recipe | null>(null)
   const [groceryOpen, setGroceryOpen] = useState(false)
+  const [pantryOpen, setPantryOpen] = useState(false)
   const [wk, setWk] = useState<'0' | '1'>('0') // which week the strip and grocery list show: this (0) or next (1)
   const week = useMemo(() => weekDates(addDays(t, wk === '1' ? 7 : 0)), [t, wk])
 
@@ -108,6 +110,18 @@ export default function Meals({ openGroceryKey = 0 }: { openGroceryKey?: number 
             <span className="text-[14px] text-white/85">Any cuisine, ready in 30 min or less</span>
           </span>
           <Sparkles size={22} />
+        </button>
+
+        <button
+          onClick={() => setPantryOpen(true)}
+          className="press mt-3 flex w-full items-center gap-3 rounded-3xl bg-card p-4 text-left shadow-sm"
+        >
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-fit-soft text-2xl">🧺</span>
+          <span className="flex-1">
+            <span className="block text-[17px] font-bold">What can I make?</span>
+            <span className="text-[14px] text-muted">Tell us what's in your kitchen</span>
+          </span>
+          <ChevronRight size={20} className="text-muted" />
         </button>
 
         <div className="mt-3 grid grid-cols-2 gap-3">
@@ -285,6 +299,7 @@ export default function Meals({ openGroceryKey = 0 }: { openGroceryKey?: number 
       </Sheet>
 
       <RecipePickerSheet target={picker} onClose={() => setPicker(null)} />
+      <PantrySheet open={pantryOpen} onClose={() => setPantryOpen(false)} />
       <RecipeDetailSheet recipe={detail} onClose={() => setDetail(null)} />
     </div>
   )

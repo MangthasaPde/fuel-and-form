@@ -46,7 +46,7 @@ export default function Recipes() {
     <div>
       <ScreenHeader
         title="Recipes"
-        subtitle={`${recipes.length} dishes · search any dish online`}
+        subtitle={`${recipes.length} dishes · or search any dish online`}
         right={
           <IconButton label="New recipe" onClick={() => setEditing({ recipe: null })} className="!bg-grape text-white">
             <Plus size={22} />
@@ -94,7 +94,7 @@ export default function Recipes() {
             <RecipePhoto recipe={r} className="h-36 w-full" emojiSize="text-[52px]" />
             <div className="p-3">
               <p className="line-clamp-2 min-h-[40px] text-[15px] font-semibold leading-tight">{r.name}</p>
-              <p className="mt-1 text-[13px] text-muted">{recipeMeta(r) || `${cuisineById(r.cuisine).emoji} ${cuisineById(r.cuisine).name}`}</p>
+              <p className="mt-1 text-[13px] text-muted">{r.calories ? `${r.calories} kcal · ${r.protein}g protein` : recipeMeta(r) || `${cuisineById(r.cuisine).emoji} ${cuisineById(r.cuisine).name}`}</p>
             </div>
           </button>
         ))}
@@ -143,7 +143,9 @@ export default function Recipes() {
                   )}
                   <div className="p-3">
                     <p className="line-clamp-2 min-h-[40px] text-[15px] font-semibold leading-tight">{w.name}</p>
-                    <p className="mt-1 truncate text-[13px] text-muted">{[w.area, w.category].filter((x) => x && x !== 'Unknown').join(' · ')}</p>
+                    <p className="mt-1 truncate text-[13px] text-muted">
+                      {w.calories ? `≈ ${w.calories} kcal · ${w.protein}g protein` : [w.area, w.category].filter((x) => x && x !== 'Unknown').join(' · ')}
+                    </p>
                   </div>
                 </button>
               ))}

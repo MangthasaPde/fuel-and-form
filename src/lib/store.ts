@@ -13,6 +13,8 @@ export interface AppState {
   weights: WeightEntry[]
   grocery: Record<string, string[]> // week start -> checked items
   recent: number[] // recently suggested recipe ids
+  pantry: string[] // "What can I make?" ingredients you have
+  pantryBasics: boolean // assume salt, pepper, oil, water and sugar
 }
 
 const STORAGE_KEY = 'fuel-and-form-v1'
@@ -25,6 +27,8 @@ const DEFAULT_STATE: AppState = {
   weights: [],
   grocery: {},
   recent: [],
+  pantry: [],
+  pantryBasics: true,
 }
 
 function load(): AppState {
@@ -127,6 +131,14 @@ export function toggleGrocery(weekStart: string, item: string) {
   const checked = state.grocery[weekStart] ?? []
   const next = checked.includes(item) ? checked.filter((i) => i !== item) : [...checked, item]
   setState({ ...state, grocery: { ...state.grocery, [weekStart]: next } })
+}
+
+export function setPantry(pantry: string[]) {
+  setState({ ...state, pantry })
+}
+
+export function setPantryBasics(pantryBasics: boolean) {
+  setState({ ...state, pantryBasics })
 }
 
 export function exportData(): string {

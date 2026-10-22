@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { BookmarkPlus, CalendarPlus, Check, Pencil, Search, Trash2 } from 'lucide-react'
+import { BookmarkPlus, CalendarPlus, Check, Pencil, Search, Sparkles, Trash2 } from 'lucide-react'
 import Sheet from '../components/Sheet'
 import RecipePhoto from '../components/RecipePhoto'
 import RecipeView, { SLOTS, recipeMeta } from '../components/RecipeView'
@@ -8,7 +8,7 @@ import { Button, Chip, Field, Segmented, inputClass } from '../components/ui'
 import { toast } from '../components/Toast'
 import { CUISINES } from '../data/cuisines'
 import { addToPlan, deleteRecipe, saveRecipe, useAppState, useRecipes } from '../lib/store'
-import { webToRecipe, type WebRecipe } from '../lib/online'
+import { estimateNutritionOnline, webToRecipe, type WebRecipe } from '../lib/online'
 import { addDays, mealTypeForNow, monthDay, today, weekDates } from '../lib/date'
 import type { CuisineId, MealType, Recipe } from '../types'
 
@@ -229,6 +229,19 @@ function RecipeForm({ initial, onSaved }: { initial: Recipe | null; onSaved: () 
     onSaved()
   }
 
+  const [estimating, setEstimating] = useState(false)
+  const estimate = async () => {
+    setEstimating(true)
+    try {
+      const n = await estimateNutritionOnline(ingredients.split('\n').map((s) => s.trim()).filter(Boolean), d.servings || 1)
+      setD((prev) => ({ ...prev, calories: n.calories, protein: n.protein, carbs: n.carbs, fat: n.fat }))
+      toast(n.unrecognised.length ? `Estimated · ${n.unrecognised.length} ingredient${n.unrecognised.length > 1 ? 's' : ''} not recognised` : 'Nutrition estimated')
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Could not estimate right now.')
+    }
+    setEstimating(false)
+  }
+
   return (
     <div className="space-y-5 pt-2">
       <Field label="Name">
@@ -269,16 +282,28 @@ function RecipeForm({ initial, onSaved }: { initial: Recipe | null; onSaved: () 
         {num('minutes', 'Time', 'min')}
         {num('servings', 'Servings')}
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        {num('calories', 'Calories', 'kcal')}
-        {num('protein', 'Protein', 'g')}
-        {num('carbs', 'Carbs', 'g')}
-        {num('fat', 'Fat', 'g')}
-      </div>
-
-      <Field label="Ingredients (one per line)">
-        <textarea rows={5} value={ingredients} onChange={(e) => setIngredients(e.target.value)} placeholder={'2 eggs\n1 cup rice'} className={inputClass} />
+      <Field label="Ingredients (one per line, with amounts)">
+        <textarea rows={5} value={ingredients} onChange={(e) => setIngredients(e.target.value)} placeholder={'2 eggs\n1 cup cooked rice\n1 tbsp soy sauce'} className={inputClass} />
       </Field>
+
+      <div>
+        <div className="mb-1.5 flex items-center justify-between px-1">
+          <span className="text-[13px] font-semibold uppercase tracking-wide text-muted">Nutrition per serving</span>
+          <button
+            onClick={estimate}
+            disabled={estimating || !ingredients.trim()}
+            className="press flex items-center gap-1 rounded-full bg-meal-soft px-3 py-1.5 text-[13px] font-semibold text-meal disabled:opacity-40"
+          >
+            <Sparkles size={14} /> {estimating ? 'Estimating…' : 'Estimate from ingredients'}
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {num('calories', 'Calories', 'kcal')}
+          {num('protein', 'Protein', 'g')}
+          {num('carbs', 'Carbs', 'g')}
+          {num('fat', 'Fat', 'g')}
+        </div>
+      </div>
       <Field label="Steps (one per line)">
         <textarea rows={5} value={steps} onChange={(e) => setSteps(e.target.value)} placeholder={'Boil the rice.\nFry the eggs.'} className={inputClass} />
       </Field>

@@ -1,4 +1,5 @@
 import { cleanItems, isPushEndpoint, isSendTime, localParts, normalizeMeal, vapidHeaders, type Stored } from './core.ts'
+import { estimateNutrition } from './nutrition.ts'
 
 export interface Env {
   SUBS: KVNamespace
@@ -47,6 +48,37 @@ export default {
       return json({ results: (data.meals ?? []).slice(0, 24).map(normalizeMeal) })
     }
 
+    if (req.method === 'GET' && url.pathname === '/api/recipes/by-ingredients') {
+      const items = (url.searchParams.get('i') ?? '')
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .filter((s) => s.length >= 2 && s.length <= 40)
+        .slice(0, 6)
+      if (!items.length) return json({ error: 'add at least one ingredient' }, 400)
+      const base = `https://www.themealdb.com/api/json/v1/${env.MEALDB_KEY || '1'}`
+      const get = async (path: string) => {
+        const res = await fetch(`${base}/${path}`, { cf: { cacheTtl: 86400, cacheEverything: true } })
+        return res.ok ? ((await res.json()) as { meals: unknown }) : { meals: null }
+      }
+      // count how many of your ingredients each dish uses (TheMealDB filters one ingredient at a time)
+      const counts = new Map<string, number>()
+      await Promise.all(
+        items.map(async (item) => {
+          const variants = item.endsWith('s') ? [item, item.slice(0, -1)] : [item, `${item}s`]
+          for (const v of variants) {
+            const { meals } = await get(`filter.php?i=${encodeURIComponent(v.replace(/ /g, '_'))}`)
+            if (Array.isArray(meals) && meals.length) {
+              for (const m of meals as { idMeal: string }[]) counts.set(m.idMeal, (counts.get(m.idMeal) ?? 0) + 1)
+              break
+            }
+          }
+        }),
+      )
+      const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 14).map(([idMeal]) => idMeal)
+      const meals = await Promise.all(top.map(async (idMeal) => ((await get(`lookup.php?i=${idMeal}`)).meals as Record<string, string | null>[] | null)?.[0]))
+      return json({ results: meals.filter((m): m is Record<string, string | null> => !!m).map(normalizeMeal) })
+    }
+
     if (req.method === 'GET' && url.pathname === '/api/list') {
       const id = url.searchParams.get('id') ?? ''
       if (!ID.test(id)) return json({ error: 'bad id' }, 400)
@@ -63,6 +95,14 @@ export default {
     } catch {
       return json({ error: 'bad json' }, 400)
     }
+    // nutrition estimate for a recipe you typed in yourself
+    if (url.pathname === '/api/nutrition') {
+      const lines = cleanItems(body.ingredients).slice(0, 60)
+      const servings = Math.min(50, Math.max(1, Math.round(Number(body.servings) || 1)))
+      if (!lines.length) return json({ error: 'add some ingredients first' }, 400)
+      return json(estimateNutrition(lines, servings))
+    }
+
     const id = String(body.id ?? '')
     if (!ID.test(id)) return json({ error: 'bad id' }, 400)
 

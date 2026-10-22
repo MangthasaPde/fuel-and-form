@@ -32,7 +32,7 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
 
       <div className="mt-3 flex flex-wrap gap-2 text-[14px] font-medium">
         {recipe.minutes > 0 && <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5"><Clock size={15} className="text-muted" />{recipe.minutes} min</span>}
-        {recipe.servings > 0 && <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5"><Users size={15} className="text-muted" />Serves {recipe.servings}</span>}
+        {recipe.servings > 0 && <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5"><Users size={15} className="text-muted" />Serves {recipe.estimated ? '~' : ''}{recipe.servings}</span>}
         {recipe.calories > 0 && <span className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5"><Flame size={15} className="text-fit" />{recipe.calories} kcal</span>}
         {recipe.video && (
           <a href={recipe.video} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-fit">
@@ -56,6 +56,11 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
           </div>
         ))}
       </div>}
+      {recipe.calories > 0 && (
+        <p className="mt-2 px-1 text-[12px] text-muted">
+          Per serving · {recipe.estimated ? 'estimated from the ingredients' : recipe.custom ? 'your numbers' : 'estimated from USDA nutrition data'}
+        </p>
+      )}
 
       <h3 className="mt-6 mb-2 text-[18px] font-bold">Ingredients</h3>
       <ul className="divide-y divide-line rounded-2xl bg-card px-4">

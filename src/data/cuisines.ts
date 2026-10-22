@@ -12,6 +12,9 @@ export const CUISINES: { id: CuisineId; name: string; emoji: string; tint: strin
   { id: 'mediterranean', name: 'Mediterranean', emoji: '🫒', tint: 'from-sky-400/25 to-emerald-300/20', cover: 30 },
   { id: 'american', name: 'American', emoji: '🍔', tint: 'from-blue-400/25 to-red-300/20', cover: 34 },
   { id: 'filipino', name: 'Filipino', emoji: '🍲', tint: 'from-yellow-400/25 to-sky-300/20', cover: 39 },
+  { id: 'vietnamese', name: 'Vietnamese', emoji: '🇻🇳', tint: 'from-red-400/25 to-yellow-300/20', cover: 41 },
+  { id: 'indonesian', name: 'Indonesian', emoji: '🇮🇩', tint: 'from-red-500/25 to-orange-200/20', cover: 46 },
+  { id: 'malaysian', name: 'Malaysian', emoji: '🇲🇾', tint: 'from-blue-400/25 to-yellow-300/20', cover: 50 },
 ]
 
 // Recipes saved from the web that don't fit the cuisines above. Not shown as a tile.
